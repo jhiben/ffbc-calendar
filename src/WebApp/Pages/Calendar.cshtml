@@ -1,0 +1,55 @@
+@page
+@model CalendarModel
+@{
+    ViewData["Title"] = $"{new DateTime(Model.DisplayYear, Model.DisplayMonth, 1):MMMM yyyy}";
+}
+
+<div class="d-flex align-items-center mb-3 gap-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-page="/Calendar" asp-route-year="@Model.PrevYear"
+           asp-route-month="@Model.PrevMonth">
+        &laquo; Prev
+    </a>
+    <h1 class="mb-0">@ViewData["Title"]</h1>
+    <a class="btn btn-outline-secondary btn-sm" asp-page="/Calendar" asp-route-year="@Model.NextYear"
+           asp-route-month="@Model.NextMonth">
+        Next &raquo;
+    </a>
+</div>
+
+<table class="table table-bordered text-center">
+    <thead class="table-light">
+        <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var week in Model.Weeks)
+        {
+            <tr>
+                @foreach (var day in week)
+                {
+                    if (day.Date is null)
+                    {
+                        <td class="text-muted bg-light"></td>
+                    }
+                    else
+                    {
+                        <td class="align-top" style="min-height:80px">
+                            <div class="fw-bold">@day.Date.Value.Day</div>
+                            @foreach (var ev in day.Events)
+                            {
+                                <div class="badge bg-primary text-wrap text-start w-100 mb-1">@ev.Title</div>
+                            }
+                        </td>
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>
