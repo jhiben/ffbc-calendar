@@ -1,19 +1,15 @@
 using FFBC.Models;
+using FFBC.Options;
 using FFBC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-
-var seedEvents = new List<Event>
-{
-    new() { Date = new DateTime(2026, 4, 5), Title = "Spring Enduro Opener", Notes = "Meet at the trailhead at 8am" },
-    new() { Date = new DateTime(2026, 4, 19), Title = "Sunday Shred – Blue Ribbons Trail", Notes = null },
-    new() { Date = new DateTime(2026, 5, 3), Title = "Club Race Day", Notes = "Register by April 28" },
-    new() { Date = new DateTime(2026, 5, 17), Title = "Skills Clinic – Drops & Jumps", Notes = "Beginner-friendly" },
-};
-builder.Services.AddSingleton<IEventStore>(new InMemoryEventStore(seedEvents));
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient("ffbc");
+builder.Services.Configure<FfbcEventStoreOptions>(builder.Configuration.GetSection(FfbcEventStoreOptions.SectionName));
+builder.Services.AddSingleton<IEventStore, FfbcWebEventStore>();
 
 var app = builder.Build();
 
