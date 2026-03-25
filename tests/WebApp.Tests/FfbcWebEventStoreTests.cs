@@ -48,6 +48,8 @@ public class FfbcWebEventStoreTests
         Assert.Equal("La Florancy", result[0].Title);
         Assert.Equal(new DateTime(2026, 4, 25), result[0].Date);
         Assert.Contains("Luxembourg - 6780 MESSANCY", result[0].Notes);
+        Assert.Equal("6780", result[0].PostalCode);
+        Assert.Equal("MESSANCY", result[0].Town);
         Assert.True(cache.TryGetValue(FfbcWebEventStore.BuildCacheKey(options), out IReadOnlyList<Event>? cached));
         Assert.NotNull(cached);
         Assert.Single(cached!);
@@ -108,6 +110,58 @@ public class FfbcWebEventStoreTests
         var result = store.GetAll();
 
         Assert.Single(result);
+    }
+
+    [Fact]
+    public void TryParseEvents_ExtractsPostalCodeAndTown_WhenPlaceHasBelgianFormat()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "Namur - 5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("5190", events[0].PostalCode);
+        Assert.Equal("Spy", events[0].Town);
+    }
+
+    [Fact]
+    public void TryParseEvents_SetsPostalCodeNull_WhenPlaceHasNoPostalCode()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "Some Place", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Null(events[0].PostalCode);
+        Assert.Equal("Some Place", events[0].Town);
+    }
+
+    [Fact]
+    public void TryParseEvents_SetsTownAndPostalCodeNull_WhenPlaceIsEmpty()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "", "Challenge");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Null(events[0].PostalCode);
+        Assert.Null(events[0].Town);
+    }
+
+    [Fact]
+    public void TryParseEvents_ExtractsPostalCodeAndTown_WhenPlaceHasProvincePrefix()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "Luxembourg - 6780 MESSANCY", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("6780", events[0].PostalCode);
+        Assert.Equal("MESSANCY", events[0].Town);
     }
 
     private static FfbcWebEventStore BuildStore(

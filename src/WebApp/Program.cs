@@ -8,8 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient("ffbc");
+builder.Services.AddHttpClient("nominatim", client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("FFBC-WebApp/1.0 (mountain-biking-events)");
+});
 builder.Services.Configure<FfbcEventStoreOptions>(builder.Configuration.GetSection(FfbcEventStoreOptions.SectionName));
 builder.Services.AddSingleton<IEventStore, FfbcWebEventStore>();
+builder.Services.AddSingleton<IGeocodingService, NominatimGeocodingService>();
 
 var app = builder.Build();
 

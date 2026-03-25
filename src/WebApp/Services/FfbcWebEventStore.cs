@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using FFBC.Models;
 using FFBC.Options;
 using HtmlAgilityPack;
@@ -11,6 +12,7 @@ namespace FFBC.Services;
 public class FfbcWebEventStore : IEventStore
 {
     private static readonly CultureInfo FrenchBelgianCulture = CultureInfo.GetCultureInfo("fr-BE");
+    private static readonly Regex BelgianPostalCodeRegex = new(@"^(?:.*\s-\s)?(\d{4})\s+(.+)$", RegexOptions.Compiled);
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
@@ -127,19 +129,47 @@ public class FfbcWebEventStore : IEventStore
                 continue;
             }
 
-            var notesParts = new[] { NormalizeWhitespace(placeText), NormalizeWhitespace(challengeText) }
+            var normalizedPlace = NormalizeWhitespace(placeText);
+            var normalizedChallenge = NormalizeWhitespace(challengeText);
+            ParsePlace(normalizedPlace, out var town, out var postalCode);
+
+            var notesParts = new[] { normalizedPlace, normalizedChallenge }
                 .Where(static part => !string.IsNullOrWhiteSpace(part));
 
             parsedEvents.Add(new Event
             {
                 Date = date,
                 Title = NormalizeWhitespace(title),
-                Notes = string.Join(" | ", notesParts)
+                Notes = string.Join(" | ", notesParts),
+                Town = town,
+                PostalCode = postalCode
             });
         }
 
         events = parsedEvents;
         return parsedEvents.Count > 0;
+    }
+
+    internal static void ParsePlace(string placeText, out string? town, out string? postalCode)
+    {
+        if (string.IsNullOrWhiteSpace(placeText))
+        {
+            town = null;
+            postalCode = null;
+            return;
+        }
+
+        var match = BelgianPostalCodeRegex.Match(placeText);
+        if (match.Success)
+        {
+            postalCode = match.Groups[1].Value;
+            town = match.Groups[2].Value.Trim();
+        }
+        else
+        {
+            postalCode = null;
+            town = placeText;
+        }
     }
 
     private static string NormalizeWhitespace(string value) =>
