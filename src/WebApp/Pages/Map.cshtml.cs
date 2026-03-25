@@ -37,7 +37,7 @@ public class MapModel : PageModel
                 continue;
             }
 
-            var coords = await _geocodingService.GeocodeAsync(ev.PostalCode, ev.Town);
+            var coords = await _geocodingService.GeocodeAsync(ev.PostalCode, ev.Town, ev.Country);
             if (coords is null)
             {
                 unmapped.Add(ev);

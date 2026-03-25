@@ -7,4 +7,5 @@ public class Event
     public string? Notes { get; set; }
     public string? Town { get; set; }
     public string? PostalCode { get; set; }
+    public string? Country { get; set; }
 }

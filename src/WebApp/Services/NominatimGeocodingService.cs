@@ -22,7 +22,7 @@ public class NominatimGeocodingService : IGeocodingService
         _logger = logger;
     }
 
-    public async Task<(double Latitude, double Longitude)?> GeocodeAsync(string postalCode, string? town)
+    public async Task<(double Latitude, double Longitude)?> GeocodeAsync(string postalCode, string? town, string? country)
     {
         var cacheKey = $"{CacheKeyPrefix}{postalCode}";
         if (_memoryCache.TryGetValue<(double, double)?>(cacheKey, out var cached))
@@ -30,7 +30,7 @@ public class NominatimGeocodingService : IGeocodingService
             return cached;
         }
 
-        var result = await FetchCoordinatesAsync(postalCode, town);
+        var result = await FetchCoordinatesAsync(postalCode, town, country);
 
         _memoryCache.Set(cacheKey, result, new MemoryCacheEntryOptions
         {
@@ -40,10 +40,10 @@ public class NominatimGeocodingService : IGeocodingService
         return result;
     }
 
-    private async Task<(double Latitude, double Longitude)?> FetchCoordinatesAsync(string postalCode, string? town)
+    private async Task<(double Latitude, double Longitude)?> FetchCoordinatesAsync(string postalCode, string? town, string? country)
     {
-        var query = string.IsNullOrWhiteSpace(town) ? postalCode : $"{postalCode} {town}";
-        var url = $"{NominatimBaseUrl}?postalcode={Uri.EscapeDataString(postalCode)}&country=Belgium&format=json&limit=1";
+        var resolvedCountry = country ?? "Belgium";
+        var url = $"{NominatimBaseUrl}?postalcode={Uri.EscapeDataString(postalCode)}&country={Uri.EscapeDataString(resolvedCountry)}&format=json&limit=1";
 
         var client = _httpClientFactory.CreateClient("nominatim");
 

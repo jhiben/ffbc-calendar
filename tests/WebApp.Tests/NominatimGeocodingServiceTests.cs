@@ -19,7 +19,7 @@ public class NominatimGeocodingServiceTests
 
         var service = BuildService(handler);
 
-        var result = await service.GeocodeAsync("5000", "Namur");
+        var result = await service.GeocodeAsync("5000", "Namur", null);
 
         Assert.NotNull(result);
         Assert.Equal(50.4669, result.Value.Latitude, 4);
@@ -36,7 +36,7 @@ public class NominatimGeocodingServiceTests
 
         var service = BuildService(handler);
 
-        var result = await service.GeocodeAsync("9999", null);
+        var result = await service.GeocodeAsync("9999", null, null);
 
         Assert.Null(result);
     }
@@ -48,7 +48,7 @@ public class NominatimGeocodingServiceTests
 
         var service = BuildService(handler);
 
-        var result = await service.GeocodeAsync("5000", "Namur");
+        var result = await service.GeocodeAsync("5000", "Namur", null);
 
         Assert.Null(result);
     }
@@ -64,8 +64,8 @@ public class NominatimGeocodingServiceTests
 
         var service = BuildService(handler);
 
-        var first = await service.GeocodeAsync("5000", "Namur");
-        var second = await service.GeocodeAsync("5000", "Namur");
+        var first = await service.GeocodeAsync("5000", "Namur", null);
+        var second = await service.GeocodeAsync("5000", "Namur", null);
 
         Assert.NotNull(first);
         Assert.NotNull(second);
@@ -83,12 +83,34 @@ public class NominatimGeocodingServiceTests
 
         var service = BuildService(handler);
 
-        var first = await service.GeocodeAsync("9999", null);
-        var second = await service.GeocodeAsync("9999", null);
+        var first = await service.GeocodeAsync("9999", null, null);
+        var second = await service.GeocodeAsync("9999", null, null);
 
         Assert.Null(first);
         Assert.Null(second);
         Assert.Equal(1, handler.CallCount);
+    }
+
+    [Fact]
+    public async Task GeocodeAsync_PassesCountryToNominatim_WhenProvided()
+    {
+        string? capturedUrl = null;
+        var json = """[{"lat":"48.8566","lon":"2.3522"}]""";
+        var handler = new StubHandler(req =>
+        {
+            capturedUrl = req.RequestUri?.ToString();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+        });
+
+        var service = BuildService(handler);
+
+        var result = await service.GeocodeAsync("75001", "Paris", "France");
+
+        Assert.NotNull(result);
+        Assert.Contains("country=France", capturedUrl);
     }
 
     private static NominatimGeocodingService BuildService(StubHandler handler)

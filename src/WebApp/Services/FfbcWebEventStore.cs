@@ -12,7 +12,8 @@ namespace FFBC.Services;
 public class FfbcWebEventStore : IEventStore
 {
     private static readonly CultureInfo FrenchBelgianCulture = CultureInfo.GetCultureInfo("fr-BE");
-    private static readonly Regex BelgianPostalCodeRegex = new(@"^(?:.*\s-\s)?(\d{4})\s+(.+)$", RegexOptions.Compiled);
+    // Matches optional province prefix, optional country prefix (B- or F-), 4-5 digit postal code, and town
+    private static readonly Regex PostalCodeRegex = new(@"^(?:.*\s-\s)?(?:([BF])-)?(\d{4,5})\s+(.+)$", RegexOptions.Compiled);
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
@@ -131,7 +132,7 @@ public class FfbcWebEventStore : IEventStore
 
             var normalizedPlace = NormalizeWhitespace(placeText);
             var normalizedChallenge = NormalizeWhitespace(challengeText);
-            ParsePlace(normalizedPlace, out var town, out var postalCode);
+            ParsePlace(normalizedPlace, out var town, out var postalCode, out var country);
 
             var notesParts = new[] { normalizedPlace, normalizedChallenge }
                 .Where(static part => !string.IsNullOrWhiteSpace(part));
@@ -142,7 +143,8 @@ public class FfbcWebEventStore : IEventStore
                 Title = NormalizeWhitespace(title),
                 Notes = string.Join(" | ", notesParts),
                 Town = town,
-                PostalCode = postalCode
+                PostalCode = postalCode,
+                Country = country
             });
         }
 
@@ -150,25 +152,29 @@ public class FfbcWebEventStore : IEventStore
         return parsedEvents.Count > 0;
     }
 
-    internal static void ParsePlace(string placeText, out string? town, out string? postalCode)
+    internal static void ParsePlace(string placeText, out string? town, out string? postalCode, out string? country)
     {
         if (string.IsNullOrWhiteSpace(placeText))
         {
             town = null;
             postalCode = null;
+            country = null;
             return;
         }
 
-        var match = BelgianPostalCodeRegex.Match(placeText);
+        var match = PostalCodeRegex.Match(placeText);
         if (match.Success)
         {
-            postalCode = match.Groups[1].Value;
-            town = match.Groups[2].Value.Trim();
+            var prefix = match.Groups[1].Value;
+            postalCode = match.Groups[2].Value;
+            town = match.Groups[3].Value.Trim();
+            country = prefix == "F" || (prefix.Length == 0 && postalCode.Length == 5) ? "France" : "Belgium";
         }
         else
         {
             postalCode = null;
             town = placeText;
+            country = null;
         }
     }
 

@@ -50,6 +50,7 @@ public class FfbcWebEventStoreTests
         Assert.Contains("Luxembourg - 6780 MESSANCY", result[0].Notes);
         Assert.Equal("6780", result[0].PostalCode);
         Assert.Equal("MESSANCY", result[0].Town);
+        Assert.Equal("Belgium", result[0].Country);
         Assert.True(cache.TryGetValue(FfbcWebEventStore.BuildCacheKey(options), out IReadOnlyList<Event>? cached));
         Assert.NotNull(cached);
         Assert.Single(cached!);
@@ -123,6 +124,7 @@ public class FfbcWebEventStoreTests
         Assert.Single(events);
         Assert.Equal("5190", events[0].PostalCode);
         Assert.Equal("Spy", events[0].Town);
+        Assert.Equal("Belgium", events[0].Country);
     }
 
     [Fact]
@@ -136,6 +138,7 @@ public class FfbcWebEventStoreTests
         Assert.Single(events);
         Assert.Null(events[0].PostalCode);
         Assert.Equal("Some Place", events[0].Town);
+        Assert.Null(events[0].Country);
     }
 
     [Fact]
@@ -149,6 +152,7 @@ public class FfbcWebEventStoreTests
         Assert.Single(events);
         Assert.Null(events[0].PostalCode);
         Assert.Null(events[0].Town);
+        Assert.Null(events[0].Country);
     }
 
     [Fact]
@@ -162,6 +166,49 @@ public class FfbcWebEventStoreTests
         Assert.Single(events);
         Assert.Equal("6780", events[0].PostalCode);
         Assert.Equal("MESSANCY", events[0].Town);
+        Assert.Equal("Belgium", events[0].Country);
+    }
+
+    [Fact]
+    public void TryParseEvents_ExtractsPostalCodeTownAndCountry_WhenPlaceHasBelgianPrefix()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "B-1234 Bruxelles", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("1234", events[0].PostalCode);
+        Assert.Equal("Bruxelles", events[0].Town);
+        Assert.Equal("Belgium", events[0].Country);
+    }
+
+    [Fact]
+    public void TryParseEvents_ExtractsPostalCodeTownAndCountry_WhenPlaceHasFrenchPrefix()
+    {
+        var html = BuildHtmlRow("French Ride", "Mercredi 25 Mars 2026", "F-59000 Lille", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("59000", events[0].PostalCode);
+        Assert.Equal("Lille", events[0].Town);
+        Assert.Equal("France", events[0].Country);
+    }
+
+    [Fact]
+    public void TryParseEvents_ExtractsPostalCodeTownAndCountry_WhenPlaceHasBareFrenchPostalCode()
+    {
+        var html = BuildHtmlRow("Bare French Ride", "Mercredi 25 Mars 2026", "59000 Lille", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("59000", events[0].PostalCode);
+        Assert.Equal("Lille", events[0].Town);
+        Assert.Equal("France", events[0].Country);
     }
 
     private static FfbcWebEventStore BuildStore(

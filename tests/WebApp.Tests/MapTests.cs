@@ -103,7 +103,7 @@ public class MapTests
             _result = result;
         }
 
-        public Task<(double Latitude, double Longitude)?> GeocodeAsync(string postalCode, string? town)
+        public Task<(double Latitude, double Longitude)?> GeocodeAsync(string postalCode, string? town, string? country)
         {
             return Task.FromResult(_result);
         }
