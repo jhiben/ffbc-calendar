@@ -53,7 +53,7 @@ public class CalendarModel : PageModel
         // Build the week grid
         var firstOfMonth = new DateTime(DisplayYear, DisplayMonth, 1);
         int daysInMonth = DateTime.DaysInMonth(DisplayYear, DisplayMonth);
-        int startOffset = (int)firstOfMonth.DayOfWeek; // 0 = Sunday
+        int startOffset = ((int)firstOfMonth.DayOfWeek + 6) % 7; // 0 = Monday, 6 = Sunday
 
         var cells = new List<CalendarDay>();
 
