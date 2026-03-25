@@ -25,10 +25,11 @@ else
             {
                 <tr>
                     <td>@ev.Date.ToString("ddd, MMM d yyyy")</td>
-                    <td>@ev.Title</td>
-                    <td>@(ev.Notes ?? string.Empty)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+                    <td><a asp-page="/EventDetail" asp-route-date="@ev.Date.ToString("yyyy-MM-dd")"
+                               asp-route-title="@ev.Title">@ev.Title</a></td>
+                        <td>@(ev.Notes ?? string.Empty)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }

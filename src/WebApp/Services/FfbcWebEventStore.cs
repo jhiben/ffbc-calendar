@@ -13,7 +13,7 @@ public class FfbcWebEventStore : IEventStore
 {
     private static readonly CultureInfo FrenchBelgianCulture = CultureInfo.GetCultureInfo("fr-BE");
     // Matches optional province prefix, optional country prefix (B- or F-), 4-5 digit postal code, and town
-    private static readonly Regex PostalCodeRegex = new(@"^(?:.*\s-\s)?(?:([BF])-)?(\d{4,5})\s+(.+)$", RegexOptions.Compiled);
+    private static readonly Regex PostalCodeRegex = new(@"^(?:(.+)\s-\s)?(?:([BF])-)?(\d{4,5})\s+(.+)$", RegexOptions.Compiled);
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _memoryCache;
@@ -64,6 +64,10 @@ public class FfbcWebEventStore : IEventStore
             return [];
         }
     }
+
+    public Event? GetByDateAndTitle(DateTime date, string title) =>
+        GetAll().FirstOrDefault(e => e.Date.Date == date.Date
+            && string.Equals(e.Title, title, StringComparison.OrdinalIgnoreCase));
 
     private IReadOnlyList<Event>? FetchAndParse()
     {
@@ -132,7 +136,7 @@ public class FfbcWebEventStore : IEventStore
 
             var normalizedPlace = NormalizeWhitespace(placeText);
             var normalizedChallenge = NormalizeWhitespace(challengeText);
-            ParsePlace(normalizedPlace, out var town, out var postalCode, out var country);
+            ParsePlace(normalizedPlace, out var town, out var postalCode, out var country, out var province);
 
             var notesParts = new[] { normalizedPlace, normalizedChallenge }
                 .Where(static part => !string.IsNullOrWhiteSpace(part));
@@ -144,7 +148,9 @@ public class FfbcWebEventStore : IEventStore
                 Notes = string.Join(" | ", notesParts),
                 Town = town,
                 PostalCode = postalCode,
-                Country = country
+                Country = country,
+                Province = province,
+                Challenge = string.IsNullOrWhiteSpace(normalizedChallenge) ? null : normalizedChallenge
             });
         }
 
@@ -152,22 +158,24 @@ public class FfbcWebEventStore : IEventStore
         return parsedEvents.Count > 0;
     }
 
-    internal static void ParsePlace(string placeText, out string? town, out string? postalCode, out string? country)
+    internal static void ParsePlace(string placeText, out string? town, out string? postalCode, out string? country, out string? province)
     {
         if (string.IsNullOrWhiteSpace(placeText))
         {
             town = null;
             postalCode = null;
             country = null;
+            province = null;
             return;
         }
 
         var match = PostalCodeRegex.Match(placeText);
         if (match.Success)
         {
-            var prefix = match.Groups[1].Value;
-            postalCode = match.Groups[2].Value;
-            town = match.Groups[3].Value.Trim();
+            province = match.Groups[1].Success ? match.Groups[1].Value.Trim() : null;
+            var prefix = match.Groups[2].Value;
+            postalCode = match.Groups[3].Value;
+            town = match.Groups[4].Value.Trim();
             country = prefix == "F" || (prefix.Length == 0 && postalCode.Length == 5) ? "France" : "Belgium";
         }
         else
@@ -175,6 +183,7 @@ public class FfbcWebEventStore : IEventStore
             postalCode = null;
             town = placeText;
             country = null;
+            province = null;
         }
     }
 

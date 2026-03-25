@@ -44,7 +44,7 @@
                             <div class="fw-bold">@day.Date.Value.Day</div>
                             @foreach (var ev in day.Events)
                             {
-                                <div class="badge bg-primary text-wrap text-start w-100 mb-1">@ev.Title</div>
+                                <a asp-page="/EventDetail" asp-route-date="@ev.Date.ToString("yyyy-MM-dd")" asp-route-title="@ev.Title" class="badge bg-primary text-wrap text-start w-100 mb-1 text-decoration-none">@ev.Title</a>
                             }
                         </td>
                     }

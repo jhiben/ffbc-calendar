@@ -12,4 +12,8 @@ public class InMemoryEventStore : IEventStore
     }
 
     public IReadOnlyList<Event> GetAll() => _events.AsReadOnly();
+
+    public Event? GetByDateAndTitle(DateTime date, string title) =>
+        _events.FirstOrDefault(e => e.Date.Date == date.Date
+            && string.Equals(e.Title, title, StringComparison.OrdinalIgnoreCase));
 }

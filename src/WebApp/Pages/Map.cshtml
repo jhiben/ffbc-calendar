@@ -28,7 +28,7 @@
             {
                 <tr>
                     <td>@ev.Date.ToString("ddd, MMM d yyyy")</td>
-                    <td>@ev.Title</td>
+                    <td><a asp-page="/EventDetail" asp-route-date="@ev.Date.ToString("yyyy-MM-dd")" asp-route-title="@ev.Title">@ev.Title</a></td>
                 </tr>
             }
         </tbody>
@@ -60,7 +60,7 @@
                 markers.forEach(function (m) {
                     var marker = L.marker([m.lat, m.lng]);
                     marker.bindPopup(
-                        '<strong>' + m.title + '</strong><br/>' +
+                        '<strong><a href="' + m.detailUrl + '">' + m.title + '</a></strong><br/>' +
                         m.date + '<br/>' +
                         m.town
                     );

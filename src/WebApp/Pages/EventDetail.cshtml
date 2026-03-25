@@ -1,0 +1,68 @@
+@page
+@model FFBC.Pages.EventDetailModel
+@{
+    ViewData["Title"] = Model.EventItem?.Title ?? "Event Not Found";
+}
+
+@if (Model.EventNotFound)
+{
+    <div class="alert alert-warning">
+        <h4>Event Not Found</h4>
+        <p>The requested event could not be found.</p>
+        <a asp-page="/ListEvents" class="btn btn-primary">Back to Event List</a>
+    </div>
+}
+else
+{
+    var ev = Model.EventItem!;
+    <h1>@ev.Title</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">@ev.Date.ToString("dddd, MMMM d yyyy")</dd>
+
+                @if (!string.IsNullOrWhiteSpace(ev.Town))
+                {
+                    <dt class="col-sm-3">Town</dt>
+                    <dd class="col-sm-9">@ev.Town</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ev.PostalCode))
+                {
+                    <dt class="col-sm-3">Postal Code</dt>
+                    <dd class="col-sm-9">@ev.PostalCode</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ev.Country))
+                {
+                    <dt class="col-sm-3">Country</dt>
+                    <dd class="col-sm-9">@ev.Country</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ev.Province))
+                {
+                    <dt class="col-sm-3">Province</dt>
+                    <dd class="col-sm-9">@ev.Province</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ev.Challenge))
+                {
+                    <dt class="col-sm-3">Challenge</dt>
+                    <dd class="col-sm-9">@ev.Challenge</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ev.Notes))
+                {
+                    <dt class="col-sm-3">Notes</dt>
+                    <dd class="col-sm-9">@ev.Notes</dd>
+                }
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-page="/ListEvents" class="btn btn-outline-secondary">Back to Event List</a>
+    </div>
+}

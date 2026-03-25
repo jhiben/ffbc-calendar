@@ -51,6 +51,8 @@ public class FfbcWebEventStoreTests
         Assert.Equal("6780", result[0].PostalCode);
         Assert.Equal("MESSANCY", result[0].Town);
         Assert.Equal("Belgium", result[0].Country);
+        Assert.Equal("Luxembourg", result[0].Province);
+        Assert.Equal("Brevet à Dénivelé", result[0].Challenge);
         Assert.True(cache.TryGetValue(FfbcWebEventStore.BuildCacheKey(options), out IReadOnlyList<Event>? cached));
         Assert.NotNull(cached);
         Assert.Single(cached!);
@@ -125,6 +127,7 @@ public class FfbcWebEventStoreTests
         Assert.Equal("5190", events[0].PostalCode);
         Assert.Equal("Spy", events[0].Town);
         Assert.Equal("Belgium", events[0].Country);
+        Assert.Equal("Namur", events[0].Province);
     }
 
     [Fact]
@@ -139,6 +142,7 @@ public class FfbcWebEventStoreTests
         Assert.Null(events[0].PostalCode);
         Assert.Equal("Some Place", events[0].Town);
         Assert.Null(events[0].Country);
+        Assert.Null(events[0].Province);
     }
 
     [Fact]
@@ -153,6 +157,8 @@ public class FfbcWebEventStoreTests
         Assert.Null(events[0].PostalCode);
         Assert.Null(events[0].Town);
         Assert.Null(events[0].Country);
+        Assert.Null(events[0].Province);
+        Assert.Equal("Challenge", events[0].Challenge);
     }
 
     [Fact]
@@ -167,6 +173,7 @@ public class FfbcWebEventStoreTests
         Assert.Equal("6780", events[0].PostalCode);
         Assert.Equal("MESSANCY", events[0].Town);
         Assert.Equal("Belgium", events[0].Country);
+        Assert.Equal("Luxembourg", events[0].Province);
     }
 
     [Fact]
@@ -209,6 +216,68 @@ public class FfbcWebEventStoreTests
         Assert.Equal("59000", events[0].PostalCode);
         Assert.Equal("Lille", events[0].Town);
         Assert.Equal("France", events[0].Country);
+        Assert.Null(events[0].Province);
+    }
+
+    [Fact]
+    public void TryParseEvents_SetsChallengeNull_WhenChallengeColumnIsEmpty()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Null(events[0].Challenge);
+    }
+
+    [Fact]
+    public void TryParseEvents_PopulatesChallengeField_WhenChallengeColumnHasText()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "5190 Spy", "Brevet à Dénivelé");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("Brevet à Dénivelé", events[0].Challenge);
+    }
+
+    [Fact]
+    public void TryParseEvents_SetsProvinceNull_WhenPlaceHasNoProvincePrefix()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Null(events[0].Province);
+    }
+
+    [Fact]
+    public void TryParseEvents_PopulatesProvinceField_WhenPlaceHasProvincePrefix()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "Namur - 5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("Namur", events[0].Province);
+    }
+
+    [Fact]
+    public void TryParseEvents_NotesStillContainsCombinedText_WhenBothPlaceAndChallengePresent()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "Namur - 5190 Spy", "Flèche");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Contains("Namur - 5190 Spy", events[0].Notes);
+        Assert.Contains("Flèche", events[0].Notes);
     }
 
     private static FfbcWebEventStore BuildStore(

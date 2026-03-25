@@ -50,7 +50,8 @@ public class MapModel : PageModel
                 Lng = coords.Value.Longitude,
                 Title = ev.Title,
                 Date = ev.Date.ToString("ddd, MMM d yyyy"),
-                Town = ev.Town ?? string.Empty
+                Town = ev.Town ?? string.Empty,
+                DetailUrl = $"/EventDetail?date={ev.Date:yyyy-MM-dd}&title={Uri.EscapeDataString(ev.Title)}"
             });
         }
 
@@ -68,5 +69,6 @@ public class MapModel : PageModel
         public string Title { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
         public string Town { get; set; } = string.Empty;
+        public string DetailUrl { get; set; } = string.Empty;
     }
 }
