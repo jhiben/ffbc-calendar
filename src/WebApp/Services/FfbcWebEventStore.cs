@@ -124,6 +124,7 @@ public class FfbcWebEventStore : IEventStore
 
         foreach (var row in rows)
         {
+            var eventId = row.SelectSingleNode(".//div[contains(@class, 'calendar-row-informations')]")?.GetAttributeValue("id", null);
             var title = HtmlEntity.DeEntitize(row.SelectSingleNode(".//div[contains(@class, 'calendar-row-name')]")?.InnerText ?? string.Empty).Trim();
             var dateText = HtmlEntity.DeEntitize(row.SelectSingleNode(".//div[contains(@class, 'calendar-row-date')]")?.InnerText ?? string.Empty).Trim();
             var placeText = HtmlEntity.DeEntitize(row.SelectSingleNode(".//div[contains(@class, 'calendar-row-place')]")?.InnerText ?? string.Empty).Trim();
@@ -143,6 +144,7 @@ public class FfbcWebEventStore : IEventStore
 
             parsedEvents.Add(new Event
             {
+                EventId = eventId,
                 Date = date,
                 Title = NormalizeWhitespace(title),
                 Notes = string.Join(" | ", notesParts),

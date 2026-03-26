@@ -15,6 +15,7 @@ builder.Services.AddHttpClient("nominatim", client =>
 builder.Services.Configure<FfbcEventStoreOptions>(builder.Configuration.GetSection(FfbcEventStoreOptions.SectionName));
 builder.Services.AddSingleton<IEventStore, FfbcWebEventStore>();
 builder.Services.AddSingleton<IGeocodingService, NominatimGeocodingService>();
+builder.Services.AddSingleton<IEventDetailsService, FfbcEventDetailsService>();
 
 var app = builder.Build();
 

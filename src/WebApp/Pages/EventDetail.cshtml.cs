@@ -9,16 +9,19 @@ namespace FFBC.Pages;
 public class EventDetailModel : PageModel
 {
     private readonly IEventStore _eventStore;
+    private readonly IEventDetailsService _eventDetailsService;
 
-    public EventDetailModel(IEventStore eventStore)
+    public EventDetailModel(IEventStore eventStore, IEventDetailsService eventDetailsService)
     {
         _eventStore = eventStore;
+        _eventDetailsService = eventDetailsService;
     }
 
     public Event? EventItem { get; private set; }
+    public EventDetails? EnrichedDetails { get; private set; }
     public bool EventNotFound { get; private set; }
 
-    public IActionResult OnGet(string? date, string? title)
+    public async Task<IActionResult> OnGetAsync(string? date, string? title)
     {
         if (string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(title))
         {
@@ -32,6 +35,12 @@ public class EventDetailModel : PageModel
 
         EventItem = _eventStore.GetByDateAndTitle(parsedDate, title);
         EventNotFound = EventItem is null;
+
+        // Fetch enriched details if event has an ID
+        if (EventItem?.EventId is not null)
+        {
+            EnrichedDetails = await _eventDetailsService.GetEventDetailsAsync(EventItem.EventId);
+        }
 
         return Page();
     }

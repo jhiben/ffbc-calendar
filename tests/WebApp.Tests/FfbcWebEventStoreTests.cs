@@ -280,6 +280,30 @@ public class FfbcWebEventStoreTests
         Assert.Contains("Flèche", events[0].Notes);
     }
 
+    [Fact]
+    public void TryParseEvents_ExtractsEventId_WhenInformationsDivHasIdAttribute()
+    {
+        var html = BuildHtmlRowWithId("12345", "Test Ride", "Mercredi 25 Mars 2026", "5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Equal("12345", events[0].EventId);
+    }
+
+    [Fact]
+    public void TryParseEvents_SetsEventIdNull_WhenInformationsDivHasNoIdAttribute()
+    {
+        var html = BuildHtmlRow("Test Ride", "Mercredi 25 Mars 2026", "5190 Spy", "");
+
+        var result = FfbcWebEventStore.TryParseEvents(html, out var events);
+
+        Assert.True(result);
+        Assert.Single(events);
+        Assert.Null(events[0].EventId);
+    }
+
     private static FfbcWebEventStore BuildStore(
         StubHttpMessageHandler handler,
         IMemoryCache? cache = null,
@@ -309,6 +333,9 @@ public class FfbcWebEventStoreTests
 
     private static string BuildHtmlRow(string title, string date, string place, string challenge) =>
         $"<div class=\"calendar-row\"><div class=\"calendar-row-informations\"><div class=\"calendar-row-name\"><b>{title}</b></div><div class=\"calendar-row-date\">{date}</div><div class=\"calendar-row-place\">{place}</div><div class=\"calendar-row-challenge\">{challenge}</div></div></div>";
+
+    private static string BuildHtmlRowWithId(string id, string title, string date, string place, string challenge) =>
+        $"<div class=\"calendar-row\"><div class=\"calendar-row-informations\" id=\"{id}\"><div class=\"calendar-row-name\"><b>{title}</b></div><div class=\"calendar-row-date\">{date}</div><div class=\"calendar-row-place\">{place}</div><div class=\"calendar-row-challenge\">{challenge}</div></div></div>";
 
     private sealed class StubHttpClientFactory(HttpClient client) : IHttpClientFactory
     {

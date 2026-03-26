@@ -35,15 +35,16 @@ public class EventDetailTests
     private static EventDetailModel BuildModel(IEnumerable<Event>? events = null)
     {
         var store = new InMemoryEventStore(events ?? SeedEvents);
-        return new EventDetailModel(store);
+        var eventDetailsService = new NullEventDetailsService();
+        return new EventDetailModel(store, eventDetailsService);
     }
 
     [Fact]
-    public void OnGet_WithValidDateAndTitle_ReturnsPageWithEvent()
+    public async Task OnGetAsync_WithValidDateAndTitle_ReturnsPageWithEvent()
     {
         var model = BuildModel();
 
-        var result = model.OnGet("2026-03-25", "Rallye des Spirous");
+        var result = await model.OnGetAsync("2026-03-25", "Rallye des Spirous");
 
         Assert.IsType<PageResult>(result);
         Assert.NotNull(model.EventItem);
@@ -52,11 +53,11 @@ public class EventDetailTests
     }
 
     [Fact]
-    public void OnGet_WithNonExistentEvent_SetsEventNotFound()
+    public async Task OnGetAsync_WithNonExistentEvent_SetsEventNotFound()
     {
         var model = BuildModel();
 
-        var result = model.OnGet("2026-03-25", "Nonexistent Ride");
+        var result = await model.OnGetAsync("2026-03-25", "Nonexistent Ride");
 
         Assert.IsType<PageResult>(result);
         Assert.Null(model.EventItem);
@@ -64,47 +65,55 @@ public class EventDetailTests
     }
 
     [Fact]
-    public void OnGet_WithMissingDate_RedirectsToListEvents()
+    public async Task OnGetAsync_WithMissingDate_RedirectsToListEvents()
     {
         var model = BuildModel();
 
-        var result = model.OnGet(null, "Rallye des Spirous");
+        var result = await model.OnGetAsync(null, "Rallye des Spirous");
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/ListEvents", redirect.PageName);
     }
 
     [Fact]
-    public void OnGet_WithMissingTitle_RedirectsToListEvents()
+    public async Task OnGetAsync_WithMissingTitle_RedirectsToListEvents()
     {
         var model = BuildModel();
 
-        var result = model.OnGet("2026-03-25", null);
+        var result = await model.OnGetAsync("2026-03-25", null);
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/ListEvents", redirect.PageName);
     }
 
     [Fact]
-    public void OnGet_WithInvalidDateFormat_RedirectsToListEvents()
+    public async Task OnGetAsync_WithInvalidDateFormat_RedirectsToListEvents()
     {
         var model = BuildModel();
 
-        var result = model.OnGet("not-a-date", "Rallye des Spirous");
+        var result = await model.OnGetAsync("not-a-date", "Rallye des Spirous");
 
         var redirect = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/ListEvents", redirect.PageName);
     }
 
     [Fact]
-    public void OnGet_TitleMatchIsCaseInsensitive()
+    public async Task OnGetAsync_TitleMatchIsCaseInsensitive()
     {
         var model = BuildModel();
 
-        var result = model.OnGet("2026-03-25", "rallye des spirous");
+        var result = await model.OnGetAsync("2026-03-25", "rallye des spirous");
 
         Assert.IsType<PageResult>(result);
         Assert.NotNull(model.EventItem);
         Assert.Equal("Rallye des Spirous", model.EventItem!.Title);
+    }
+
+    /// <summary>
+    /// Test implementation of IEventDetailsService that returns null.
+    /// </summary>
+    private sealed class NullEventDetailsService : IEventDetailsService
+    {
+        public Task<EventDetails?> GetEventDetailsAsync(string eventId) => Task.FromResult<EventDetails?>(null);
     }
 }
