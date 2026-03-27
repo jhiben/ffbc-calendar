@@ -4,6 +4,29 @@
     ViewData["Title"] = Model.EventItem?.Title ?? "Event Not Found";
 }
 
+@functions {
+    static string GetDifficultyClass(string? difficulty)
+    {
+        if (string.IsNullOrWhiteSpace(difficulty) || difficulty == "—" || difficulty.Equals("N.A", StringComparison.OrdinalIgnoreCase))
+            return "difficulty-unknown";
+
+        var lower = difficulty.Trim().ToLowerInvariant();
+
+        if (lower == "1" || lower.Contains("facile") || lower.Contains("easy") || lower.Contains("débutant"))
+            return "difficulty-easy";
+        if (lower == "2" || lower.Contains("moyen") || lower.Contains("moderate") || lower.Contains("medium"))
+            return "difficulty-moderate";
+        if (lower == "3" || lower.Contains("difficile") || lower.Contains("hard"))
+            return "difficulty-hard";
+        if (lower == "4" || lower == "5" || lower.Contains("expert") || lower.Contains("très"))
+            return "difficulty-expert";
+
+        return "difficulty-unknown";
+    }
+
+    static bool HasValue(string? val) => !string.IsNullOrWhiteSpace(val) && val != "—" && !val.Equals("N.A", StringComparison.OrdinalIgnoreCase);
+}
+
 @if (Model.EventNotFound)
 {
     <div class="alert alert-warning">
@@ -24,42 +47,42 @@ else
         </div>
         <div class="card-body">
             <dl class="row mb-0">
-                <dt class="col-sm-3">Date</dt>
+                <dt class="col-sm-3"><span class="detail-emoji">📅</span> Date</dt>
                 <dd class="col-sm-9">@ev.Date.ToString("dddd, MMMM d yyyy")</dd>
 
                 @if (!string.IsNullOrWhiteSpace(ev.Town))
                 {
-                    <dt class="col-sm-3">Town</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">🏘️</span> Town</dt>
                     <dd class="col-sm-9">@ev.Town</dd>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(ev.PostalCode))
                 {
-                    <dt class="col-sm-3">Postal Code</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">📮</span> Postal Code</dt>
                     <dd class="col-sm-9">@ev.PostalCode</dd>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(ev.Country))
                 {
-                    <dt class="col-sm-3">Country</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">🌍</span> Country</dt>
                     <dd class="col-sm-9">@ev.Country</dd>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(ev.Province))
                 {
-                    <dt class="col-sm-3">Province</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">🗺️</span> Province</dt>
                     <dd class="col-sm-9">@ev.Province</dd>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(ev.Challenge))
                 {
-                    <dt class="col-sm-3">Challenge</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">🏆</span> Challenge</dt>
                     <dd class="col-sm-9">@ev.Challenge</dd>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(ev.Notes))
                 {
-                    <dt class="col-sm-3">Notes</dt>
+                    <dt class="col-sm-3"><span class="detail-emoji">📝</span> Notes</dt>
                     <dd class="col-sm-9">@ev.Notes</dd>
                 }
             </dl>
@@ -84,7 +107,7 @@ else
                     <dl class="row mb-0">
                         @if (!string.IsNullOrWhiteSpace(details.StartLocation))
                         {
-                            <dt class="col-sm-3">Start Location</dt>
+                            <dt class="col-sm-3"><span class="detail-emoji">📍</span> Start Location</dt>
                             <dd class="col-sm-9">
                                 @details.StartLocation
                                 @if (!string.IsNullOrWhiteSpace(details.Address))
@@ -93,33 +116,33 @@ else
                                 }
                                 @if (!string.IsNullOrWhiteSpace(details.MapsUrl))
                                 {
-                                    <br /><a href="@details.MapsUrl" target="_blank" rel="noopener">Directions</a>
+                                    <br /><a href="@details.MapsUrl" target="_blank" rel="noopener">📍 Directions</a>
                                 }
                             </dd>
                         }
 
                         @if (!string.IsNullOrWhiteSpace(details.Club))
                         {
-                            <dt class="col-sm-3">Club</dt>
+                            <dt class="col-sm-3"><span class="detail-emoji">🏠</span> Club</dt>
                             <dd class="col-sm-9">@details.Club</dd>
                         }
 
                         @if (!string.IsNullOrWhiteSpace(details.Website))
                         {
-                            <dt class="col-sm-3">Website</dt>
+                            <dt class="col-sm-3"><span class="detail-emoji">🌐</span> Website</dt>
                             <dd class="col-sm-9"><a href="@details.Website" target="_blank" rel="noopener">@details.Website</a></dd>
                         }
 
                         @if (!string.IsNullOrWhiteSpace(details.RegistrationUrl))
                         {
-                            <dt class="col-sm-3">Registration</dt>
+                            <dt class="col-sm-3"><span class="detail-emoji">🎫</span> Registration</dt>
                             <dd class="col-sm-9"><a href="@details.RegistrationUrl" target="_blank" rel="noopener"
                                                         class="btn btn-sm btn-primary">Register Now →</a></dd>
                         }
 
                         @if (!string.IsNullOrWhiteSpace(details.Notes))
                         {
-                            <dt class="col-sm-3">Notes</dt>
+                            <dt class="col-sm-3"><span class="detail-emoji">📝</span> Notes</dt>
                             <dd class="col-sm-9">@details.Notes</dd>
                         }
                     </dl>
@@ -130,36 +153,48 @@ else
             {
                 <div class="card mt-3 detail-section">
                     <div class="card-header">
-                        <h5 class="mb-0">🚴 Activities</h5>
+                        <h5 class="mb-0">🚴 Activities <span class="text-muted fw-normal" style="font-size:var(--font-size-sm)">(@details.Activities.Count route@(details.Activities.Count != 1 ? "s" : ""))</span></h5>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Distance</th>
-                                    <th>D+</th>
-                                    <th>Difficulty</th>
-                                    <th>Time</th>
-                                    <th>Ravito</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var activity in details.Activities)
-                                {
-                                    <tr>
-                                        <td>@activity.Type</td>
-                                        <td>@(activity.Distance ?? "—")</td>
-                                        <td>@(activity.Elevation ?? "—")</td>
-                                        <td>@(activity.Difficulty ?? "—")</td>
-                                        <td>@(activity.Time ?? "—")</td>
-                                        <td>@(activity.Ravito ?? "—")</td>
-                                        <td>@(activity.Price ?? "—")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <div class="activity-cards">
+                        @foreach (var activity in details.Activities)
+                        {
+                            <div class="activity-card">
+                                <div class="activity-card-header">
+                                    <span class="activity-type-badge">@activity.Type</span>
+                                    @if (HasValue(activity.Time))
+                                    {
+                                        <span class="text-muted" style="font-size:var(--font-size-sm)">🕐 @activity.Time</span>
+                                    }
+                                </div>
+                                <div class="activity-metrics">
+                                    <span class="activity-metric">
+                                        <span class="activity-metric-emoji">📏</span>
+                                        <span class="activity-metric-label">Dist.</span>
+                                        <span class="activity-metric-value @(HasValue(activity.Distance) ? "" : "muted")">@(activity.Distance ?? "—")</span>
+                                    </span>
+                                    <span class="activity-metric">
+                                        <span class="activity-metric-emoji">⛰️</span>
+                                        <span class="activity-metric-label">D+</span>
+                                        <span class="activity-metric-value @(HasValue(activity.Elevation) ? "" : "muted")">@(activity.Elevation ?? "—")</span>
+                                    </span>
+                                    <span class="activity-metric @GetDifficultyClass(activity.Difficulty)">
+                                        <span class="activity-metric-emoji">💪</span>
+                                        <span class="activity-metric-label">Diff.</span>
+                                        <span class="activity-metric-value @(HasValue(activity.Difficulty) ? "" : "muted")">@(activity.Difficulty ?? "—")</span>
+                                    </span>
+                                    <span class="activity-metric">
+                                        <span class="activity-metric-emoji">🥤</span>
+                                        <span class="activity-metric-label">Ravito</span>
+                                        <span class="activity-metric-value @(HasValue(activity.Ravito) ? "" : "muted")">@(activity.Ravito ?? "—")</span>
+                                    </span>
+                                    <span class="activity-metric @(HasValue(activity.Price) ? "price-paid" : "")">
+                                        <span class="activity-metric-emoji">💰</span>
+                                        <span class="activity-metric-label">Price</span>
+                                        <span class="activity-metric-value @(HasValue(activity.Price) ? "" : "muted")">@(activity.Price ?? "—")</span>
+                                    </span>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             }

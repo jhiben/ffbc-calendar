@@ -41,7 +41,7 @@ The `IEventStore` interface SHALL expose a method to retrieve a single event by 
 
 ### Requirement: Display enriched event details
 
-The Event Detail page SHALL display additional information fetched from the popup API when available.
+The Event Detail page SHALL display additional information fetched from the popup API when available. Activities SHALL be rendered as visually enriched cards with emoji-labeled metrics and color-coded badges instead of plain table rows.
 
 #### Scenario: Enriched details displayed when available
 
@@ -57,3 +57,8 @@ The Event Detail page SHALL display additional information fetched from the popu
 
 - **WHEN** enriched details are not available for an event
 - **THEN** the page SHALL NOT display an empty enriched details section
+
+#### Scenario: Activities rendered as visual cards
+
+- **WHEN** enriched details include one or more activities
+- **THEN** the page SHALL render each activity as a styled card with emoji-labeled metric badges instead of a plain table row

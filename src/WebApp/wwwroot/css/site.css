@@ -543,3 +543,139 @@ a:hover {
 .detail-section .card-header {
   border-left: none;
 }
+
+/* =====================================================
+   ACTIVITY CARDS
+   ===================================================== */
+
+.activity-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.activity-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-white);
+  padding: 1rem 1.25rem;
+  transition: box-shadow var(--transition-base);
+}
+
+.activity-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.activity-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.activity-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.activity-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.activity-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.activity-metric-emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.activity-metric-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.activity-metric-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.activity-metric-value.muted {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Difficulty color badges */
+.difficulty-easy {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.difficulty-moderate {
+  background-color: #fef9c3;
+  border-color: #fde047;
+  color: #854d0e;
+}
+
+.difficulty-hard {
+  background-color: #ffedd5;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+.difficulty-expert {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.difficulty-unknown {
+  background-color: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* Price styling */
+.activity-metric.price-paid {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
+/* Emoji-labeled detail fields */
+.detail-emoji {
+  margin-right: 0.25rem;
+}
+
+@media (max-width: 575.98px) {
+  .activity-metrics {
+    flex-direction: column;
+  }
+  .activity-metric {
+    width: 100%;
+  }
+}
