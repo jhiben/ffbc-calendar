@@ -1,10 +1,25 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero">
+    <h1>🚵 FFBC Mountain Bike Events</h1>
+    <p class="hero-sub">Find and plan your next FFBC-licensed mountain bike event across Belgium.</p>
+</div>
+
+<div class="nav-cards">
+    <a asp-page="/ListEvents" class="nav-card">
+        <span class="nav-card-icon">📋</span>
+        <span>Event List</span>
+    </a>
+    <a asp-page="/Calendar" class="nav-card">
+        <span class="nav-card-icon">📅</span>
+        <span>Calendar</span>
+    </a>
+    <a asp-page="/Map" class="nav-card">
+        <span class="nav-card-icon">🗺️</span>
+        <span>Map</span>
+    </a>
 </div>

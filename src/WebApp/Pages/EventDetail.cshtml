@@ -18,7 +18,10 @@ else
     var details = Model.EnrichedDetails;
     <h1>@ev.Title</h1>
 
-    <div class="card">
+    <div class="card detail-section">
+        <div class="card-header">
+            <h5 class="mb-0">📍 General Information</h5>
+        </div>
         <div class="card-body">
             <dl class="row mb-0">
                 <dt class="col-sm-3">Date</dt>
@@ -73,9 +76,9 @@ else
 
         if (hasEnrichedContent)
         {
-            <div class="card mt-3">
+            <div class="card mt-3 detail-section">
                 <div class="card-header">
-                    <h5 class="mb-0">Additional Details</h5>
+                    <h5 class="mb-0">ℹ️ Additional Details</h5>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
@@ -111,59 +114,59 @@ else
                         {
                             <dt class="col-sm-3">Registration</dt>
                             <dd class="col-sm-9"><a href="@details.RegistrationUrl" target="_blank" rel="noopener"
-                                                        class="btn btn-sm btn-primary">Register</a></dd>
-                            }
+                                                        class="btn btn-sm btn-primary">Register Now →</a></dd>
+                        }
 
-                            @if (!string.IsNullOrWhiteSpace(details.Notes))
-                            {
-                                <dt class="col-sm-3">Notes</dt>
-                                <dd class="col-sm-9">@details.Notes</dd>
-                            }
-                        </dl>
+                        @if (!string.IsNullOrWhiteSpace(details.Notes))
+                        {
+                            <dt class="col-sm-3">Notes</dt>
+                            <dd class="col-sm-9">@details.Notes</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            @if (details.Activities.Count > 0)
+            {
+                <div class="card mt-3 detail-section">
+                    <div class="card-header">
+                        <h5 class="mb-0">🚴 Activities</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Distance</th>
+                                    <th>D+</th>
+                                    <th>Difficulty</th>
+                                    <th>Time</th>
+                                    <th>Ravito</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var activity in details.Activities)
+                                {
+                                    <tr>
+                                        <td>@activity.Type</td>
+                                        <td>@(activity.Distance ?? "—")</td>
+                                        <td>@(activity.Elevation ?? "—")</td>
+                                        <td>@(activity.Difficulty ?? "—")</td>
+                                        <td>@(activity.Time ?? "—")</td>
+                                        <td>@(activity.Ravito ?? "—")</td>
+                                        <td>@(activity.Price ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                @if (details.Activities.Count > 0)
-                {
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0">Activities</h5>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-striped mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Distance</th>
-                                        <th>D+</th>
-                                        <th>Difficulty</th>
-                                        <th>Time</th>
-                                        <th>Ravito</th>
-                                        <th>Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var activity in details.Activities)
-                                    {
-                                        <tr>
-                                            <td>@activity.Type</td>
-                                            <td>@(activity.Distance ?? "—")</td>
-                                            <td>@(activity.Elevation ?? "—")</td>
-                                            <td>@(activity.Difficulty ?? "—")</td>
-                                            <td>@(activity.Time ?? "—")</td>
-                                            <td>@(activity.Ravito ?? "—")</td>
-                                            <td>@(activity.Price ?? "—")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
             }
         }
-
-        <div class="mt-3">
-            <a asp-page="/ListEvents" class="btn btn-outline-secondary">Back to Event List</a>
-        </div>
     }
+
+    <div class="mt-3">
+        <a asp-page="/ListEvents" class="btn btn-outline-secondary">← Back to Event List</a>
+    </div>
+}

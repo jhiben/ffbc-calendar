@@ -2,9 +2,10 @@
 @model CalendarModel
 @{
     ViewData["Title"] = $"{new DateTime(Model.DisplayYear, Model.DisplayMonth, 1):MMMM yyyy}";
+    var today = DateTime.Today;
 }
 
-<div class="d-flex align-items-center mb-3 gap-3">
+<div class="d-flex align-items-center mb-4 gap-3">
     <a class="btn btn-outline-secondary btn-sm" asp-page="/Calendar" asp-route-year="@Model.PrevYear"
            asp-route-month="@Model.PrevMonth">
         &laquo; Prev
@@ -16,40 +17,43 @@
     </a>
 </div>
 
-<table class="table table-bordered text-center">
-    <thead class="table-light">
-        <tr>
-            <th>Mon</th>
-            <th>Tue</th>
-            <th>Wed</th>
-            <th>Thu</th>
-            <th>Fri</th>
-            <th>Sat</th>
-            <th>Sun</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var week in Model.Weeks)
-        {
+<div class="table-responsive">
+    <table class="table table-bordered calendar-table">
+        <thead>
             <tr>
-                @foreach (var day in week)
-                {
-                    if (day.Date is null)
-                    {
-                        <td class="text-muted bg-light"></td>
-                    }
-                    else
-                    {
-                        <td class="align-top" style="min-height:80px">
-                            <div class="fw-bold">@day.Date.Value.Day</div>
-                            @foreach (var ev in day.Events)
-                            {
-                                <a asp-page="/EventDetail" asp-route-date="@ev.Date.ToString("yyyy-MM-dd")" asp-route-title="@ev.Title" class="badge bg-primary text-wrap text-start w-100 mb-1 text-decoration-none">@ev.Title</a>
-                            }
-                        </td>
-                    }
-                }
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+                <th>Sun</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var week in Model.Weeks)
+            {
+                <tr>
+                    @foreach (var day in week)
+                    {
+                        if (day.Date is null)
+                        {
+                            <td class="calendar-empty"></td>
+                        }
+                        else
+                        {
+                            var isToday = day.Date.Value.Date == today;
+                            <td class="@(isToday ? "calendar-today" : "")">
+                                <div class="calendar-day-number">@day.Date.Value.Day</div>
+                                @foreach (var ev in day.Events)
+                                {
+                                    <a asp-page="/EventDetail" asp-route-date="@ev.Date.ToString("yyyy-MM-dd")" asp-route-title="@ev.Title" class="event-chip" title="@ev.Title">@ev.Title</a>
+                                }
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
