@@ -31,11 +31,36 @@
 			const shadowUrl = (await import('leaflet/dist/images/marker-shadow.png')).default;
 			L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
 
-			// Initialize map before loading data so the visible container gets proper dimensions
-			const map = L.map(mapContainer).setView([50.5, 4.5], 8);
+			// ~100km radius ≈ zoom 9 for Leaflet
+			const DEFAULT_CENTER: [number, number] = [50.25, 5.5]; // Luxembourg, Belgium
+			const NEARBY_ZOOM = 9;
+
+			// Try to get user location first to center the map
+			const userPos = await new Promise<{ lat: number; lng: number } | null>((resolve) => {
+				if (!navigator.geolocation) return resolve(null);
+				navigator.geolocation.getCurrentPosition(
+					(pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+					() => resolve(null),
+					{ timeout: 5000 }
+				);
+			});
+
+			const center: [number, number] = userPos ? [userPos.lat, userPos.lng] : DEFAULT_CENTER;
+			const map = L.map(mapContainer).setView(center, NEARBY_ZOOM);
 			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
+
+			if (userPos) {
+				L.marker([userPos.lat, userPos.lng], {
+					icon: L.divIcon({
+						className: 'bg-primary rounded-circle border border-white',
+						iconSize: [14, 14]
+					})
+				})
+					.addTo(map)
+					.bindPopup('You are here');
+			}
 
 			const data = await events.load();
 			allEvents = data;
@@ -82,36 +107,8 @@
 
 			unmappedEvents = unmapped;
 
-			if (mapped.length > 0) {
-				const bounds = L.latLngBounds(mapped.map((e) => {
-					const key = `${e.postalCode}:${e.country ?? ''}`;
-					const c = seen.get(key)!;
-					return [c.lat, c.lng] as [number, number];
-				}));
-				map.fitBounds(bounds, { padding: [30, 30], animate: false, maxZoom: 14 });
-			}
-
 			// Ensure tiles recalculate after view changes
 			map.invalidateSize();
-
-			// Geolocation
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(
-					(pos) => {
-						const { latitude, longitude } = pos.coords;
-						L.marker([latitude, longitude], {
-							icon: L.divIcon({
-								className: 'bg-primary rounded-circle border border-white',
-								iconSize: [14, 14]
-							})
-						})
-							.addTo(map)
-							.bindPopup('You are here');
-					},
-					() => {},
-					{ timeout: 5000 }
-				);
-			}
 
 			loading = false;
 		} catch (e: any) {
