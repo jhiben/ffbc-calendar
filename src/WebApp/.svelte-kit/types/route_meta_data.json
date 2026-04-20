@@ -1,0 +1,18 @@
+{
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/calendar": [
+		"src/routes/+layout.ts"
+	],
+	"/event": [
+		"src/routes/+layout.ts"
+	],
+	"/list": [
+		"src/routes/+layout.ts"
+	],
+	"/map": [
+		"src/routes/+layout.ts"
+	]
+}

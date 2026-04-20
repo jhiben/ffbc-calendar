@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "FfbcEventStore__PostUrl": "https://www.velo-liberte.be/wp-content/themes/zapedah-child/assets/scripts/ajax_request_calendrier.php",
+    "FfbcEventStore__BaseUrl": "https://www.velo-liberte.be/wp-content/themes/zapedah-child",
+    "FfbcEventStore__Province": "Luxembourg",
+    "FfbcEventStore__Challenge": "",
+    "FfbcEventStore__VttRoute": "vtt/marche",
+    "FfbcEventStore__Year": "2026",
+    "FfbcEventStore__Date": "2026-03-25",
+    "FfbcEventStore__CacheDurationMinutes": "120"
+  }
+}
