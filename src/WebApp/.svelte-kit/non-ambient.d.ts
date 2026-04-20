@@ -42,6 +42,6 @@ declare module "$app/types" {
 		};
 		Pathname(): "/" | "/calendar" | "/event" | "/list" | "/map";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/favicon.ico" | "/robots.txt" | string & {};
+		Asset(): "/favicon.ico" | "/robots.txt" | "/staticwebapp.config.json" | string & {};
 	}
 }

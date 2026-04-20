@@ -1,0 +1,20 @@
+{
+  "platform": {
+    "apiRuntime": "dotnet-isolated:9.0"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/api/*", "/assets/*", "*.css", "*.js", "*.ico", "*.png", "*.jpg", "*.svg", "*.woff2"]
+  },
+  "routes": [
+    {
+      "route": "/feed.xml",
+      "rewrite": "/api/feed.xml"
+    }
+  ],
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+}
