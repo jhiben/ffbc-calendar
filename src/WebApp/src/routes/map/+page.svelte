@@ -88,8 +88,11 @@
 					const c = seen.get(key)!;
 					return [c.lat, c.lng] as [number, number];
 				}));
-				map.fitBounds(bounds, { padding: [30, 30] });
+				map.fitBounds(bounds, { padding: [30, 30], animate: false, maxZoom: 14 });
 			}
+
+			// Ensure tiles recalculate after view changes
+			map.invalidateSize();
 
 			// Geolocation
 			if (navigator.geolocation) {

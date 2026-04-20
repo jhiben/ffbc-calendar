@@ -6,6 +6,10 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const upcomingItems = $derived(items.filter((e) => new Date(e.date) >= today));
+
 	$effect(() => {
 		events.load().then((data) => {
 			items = data;
@@ -42,8 +46,8 @@
 	</div>
 {:else if error}
 	<div class="alert alert-danger">{error}</div>
-{:else if items.length === 0}
-	<div class="alert alert-info">No events found.</div>
+{:else if upcomingItems.length === 0}
+	<div class="alert alert-info">No upcoming events found.</div>
 {:else}
 	<div class="table-responsive">
 		<table class="table">
@@ -55,7 +59,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each items as event}
+				{#each upcomingItems as event}
 					<tr>
 						<td>{formatDate(event.date)}</td>
 						<td><a href={eventUrl(event)}>{event.title}</a></td>
