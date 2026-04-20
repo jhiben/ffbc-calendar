@@ -6,6 +6,7 @@
 	let allEvents = $state<Event[]>([]);
 	let unmappedEvents = $state<Event[]>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 	let mapContainer: HTMLDivElement;
 
 	function eventUrl(event: Event): string {
@@ -20,8 +21,9 @@
 	}
 
 	onMount(async () => {
-		const L = await import('leaflet');
-		await import('leaflet/dist/leaflet.css');
+		try {
+			const L = await import('leaflet');
+			await import('leaflet/dist/leaflet.css');
 
 		const data = await events.load();
 		allEvents = data;
@@ -103,6 +105,10 @@
 		}
 
 		loading = false;
+		} catch (e: any) {
+			error = e.message;
+			loading = false;
+		}
 	});
 </script>
 
@@ -118,6 +124,8 @@
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	</div>
+{:else if error}
+	<div class="alert alert-danger">{error}</div>
 {/if}
 
 <div bind:this={mapContainer} id="map" class:d-none={loading}></div>

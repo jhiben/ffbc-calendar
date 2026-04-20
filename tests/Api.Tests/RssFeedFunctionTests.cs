@@ -2,6 +2,7 @@ using FFBC.Functions;
 using FFBC.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FFBC.Tests;
 
@@ -15,7 +16,7 @@ public class RssFeedFunctionTests
             new() { Date = new DateTime(2026, 3, 25), Title = "Rallye des Spirous", Town = "Spy", Country = "Belgium" }
         };
         var store = new StubEventStore(events);
-        var function = new RssFeedFunction(store);
+        var function = new RssFeedFunction(store, NullLogger<RssFeedFunction>.Instance);
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Scheme = "https";
         httpContext.Request.Host = new HostString("example.com");
@@ -38,7 +39,7 @@ public class RssFeedFunctionTests
             new() { Date = new DateTime(2026, 3, 1), Title = "Earlier Event", Town = "Spy" }
         };
         var store = new StubEventStore(events);
-        var function = new RssFeedFunction(store);
+        var function = new RssFeedFunction(store, NullLogger<RssFeedFunction>.Instance);
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Scheme = "https";
         httpContext.Request.Host = new HostString("example.com");
@@ -55,7 +56,7 @@ public class RssFeedFunctionTests
     public async Task Run_ReturnsEmptyFeed_WhenNoEvents()
     {
         var store = new StubEventStore([]);
-        var function = new RssFeedFunction(store);
+        var function = new RssFeedFunction(store, NullLogger<RssFeedFunction>.Instance);
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Scheme = "https";
         httpContext.Request.Host = new HostString("example.com");
@@ -84,7 +85,7 @@ public class RssFeedFunctionTests
             }
         };
         var store = new StubEventStore(events);
-        var function = new RssFeedFunction(store);
+        var function = new RssFeedFunction(store, NullLogger<RssFeedFunction>.Instance);
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Scheme = "https";
         httpContext.Request.Host = new HostString("example.com");

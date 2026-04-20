@@ -2,6 +2,7 @@ using System.Text.Json;
 using FFBC.Functions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FFBC.Tests;
 
@@ -11,7 +12,7 @@ public class GeocodeFunctionTests
     public async Task Run_ReturnsCoordinates_WhenFound()
     {
         var service = new StubGeocodingService((50.4669, 4.8719));
-        var function = new GeocodeFunction(service);
+        var function = new GeocodeFunction(service, NullLogger<GeocodeFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "5000");
@@ -28,7 +29,7 @@ public class GeocodeFunctionTests
     public async Task Run_ReturnsNotFound_WhenNull()
     {
         var service = new StubGeocodingService(null);
-        var function = new GeocodeFunction(service);
+        var function = new GeocodeFunction(service, NullLogger<GeocodeFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "9999");
@@ -41,7 +42,7 @@ public class GeocodeFunctionTests
     public async Task Run_ReturnsNotFound_WhenPostalCodeIsEmpty()
     {
         var service = new StubGeocodingService(null);
-        var function = new GeocodeFunction(service);
+        var function = new GeocodeFunction(service, NullLogger<GeocodeFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "  ");

@@ -3,6 +3,7 @@ using FFBC.Functions;
 using FFBC.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FFBC.Tests;
 
@@ -13,7 +14,7 @@ public class EventDetailsFunctionTests
     {
         var details = new EventDetails { EventId = "123", Club = "Test Club" };
         var service = new StubEventDetailsService(details);
-        var function = new EventDetailsFunction(service);
+        var function = new EventDetailsFunction(service, NullLogger<EventDetailsFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "123");
@@ -30,7 +31,7 @@ public class EventDetailsFunctionTests
     public async Task Run_ReturnsNotFound_WhenNull()
     {
         var service = new StubEventDetailsService(null);
-        var function = new EventDetailsFunction(service);
+        var function = new EventDetailsFunction(service, NullLogger<EventDetailsFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "999");
@@ -43,7 +44,7 @@ public class EventDetailsFunctionTests
     public async Task Run_ReturnsNotFound_WhenEventIdIsEmpty()
     {
         var service = new StubEventDetailsService(null);
-        var function = new EventDetailsFunction(service);
+        var function = new EventDetailsFunction(service, NullLogger<EventDetailsFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = await function.Run(httpContext.Request, "  ");

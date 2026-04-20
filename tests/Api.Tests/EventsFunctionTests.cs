@@ -3,6 +3,7 @@ using FFBC.Functions;
 using FFBC.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace FFBC.Tests;
 
@@ -17,7 +18,7 @@ public class EventsFunctionTests
             new() { Date = new DateTime(2026, 3, 1), Title = "Earlier" }
         };
         var store = new StubEventStore(events);
-        var function = new EventsFunction(store);
+        var function = new EventsFunction(store, NullLogger<EventsFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = function.Run(httpContext.Request);
@@ -36,7 +37,7 @@ public class EventsFunctionTests
     public async Task Run_ReturnsEmptyArray_WhenNoEvents()
     {
         var store = new StubEventStore([]);
-        var function = new EventsFunction(store);
+        var function = new EventsFunction(store, NullLogger<EventsFunction>.Instance);
         var httpContext = new DefaultHttpContext();
 
         var result = function.Run(httpContext.Request);

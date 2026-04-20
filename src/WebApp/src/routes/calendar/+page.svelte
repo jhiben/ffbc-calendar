@@ -5,6 +5,7 @@
 
 	let allEvents = $state<Event[]>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 
 	const searchParams = $derived(page.url.searchParams);
 	const displayYear = $derived(Number(searchParams.get('year')) || new Date().getFullYear());
@@ -72,6 +73,9 @@
 		events.load().then((data) => {
 			allEvents = data;
 			loading = false;
+		}).catch((e) => {
+			error = e.message;
+			loading = false;
 		});
 	});
 
@@ -94,6 +98,8 @@
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	</div>
+{:else if error}
+	<div class="alert alert-danger">{error}</div>
 {:else}
 	<table class="calendar-table">
 		<thead>

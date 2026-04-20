@@ -4,63 +4,74 @@ using System.Xml;
 using FFBC.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
 
 namespace FFBC.Functions;
 
 public class RssFeedFunction
 {
     private readonly IEventStore _eventStore;
+    private readonly ILogger<RssFeedFunction> _logger;
 
-    public RssFeedFunction(IEventStore eventStore)
+    public RssFeedFunction(IEventStore eventStore, ILogger<RssFeedFunction> logger)
     {
         _eventStore = eventStore;
+        _logger = logger;
     }
 
     [Function("RssFeed")]
     public IResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "feed.xml")] HttpRequest req)
     {
-        var baseUrl = $"{req.Scheme}://{req.Host}";
+        try
+        {
+            var baseUrl = $"{req.Scheme}://{req.Host}";
 
-        var feed = new SyndicationFeed(
-            "FFBC Calendar Events",
-            "Upcoming FFBC-licensed mountain bike events",
-            new Uri(baseUrl));
+            var feed = new SyndicationFeed(
+                "FFBC Calendar Events",
+                "Upcoming FFBC-licensed mountain bike events",
+                new Uri(baseUrl));
 
-        var items = _eventStore.GetAll()
-            .OrderBy(e => e.Date)
-            .Select(e =>
-            {
-                var detailUrl = $"{baseUrl}/event?date={e.Date:yyyy-MM-dd}&title={Uri.EscapeDataString(e.Title)}";
-                var description = string.Join(" — ",
-                    new[] { e.Town, e.Country, e.Notes }.Where(s => !string.IsNullOrWhiteSpace(s)));
-
-                return new SyndicationItem(
-                    e.Title,
-                    description,
-                    new Uri(detailUrl))
+            var items = _eventStore.GetAll()
+                .OrderBy(e => e.Date)
+                .Select(e =>
                 {
-                    PublishDate = new DateTimeOffset(e.Date, TimeSpan.Zero),
-                    Id = detailUrl
-                };
-            })
-            .ToList();
+                    var detailUrl = $"{baseUrl}/event?date={e.Date:yyyy-MM-dd}&title={Uri.EscapeDataString(e.Title)}";
+                    var description = string.Join(" — ",
+                        new[] { e.Town, e.Country, e.Notes }.Where(s => !string.IsNullOrWhiteSpace(s)));
 
-        feed.Items = items;
-        feed.LastUpdatedTime = DateTimeOffset.UtcNow;
+                    return new SyndicationItem(
+                        e.Title,
+                        description,
+                        new Uri(detailUrl))
+                    {
+                        PublishDate = new DateTimeOffset(e.Date, TimeSpan.Zero),
+                        Id = detailUrl
+                    };
+                })
+                .ToList();
 
-        using var stream = new MemoryStream();
-        using (var writer = XmlWriter.Create(stream, new XmlWriterSettings
-        {
-            Encoding = Encoding.UTF8,
-            Indent = true
-        }))
-        {
-            new Rss20FeedFormatter(feed).WriteTo(writer);
+            feed.Items = items;
+            feed.LastUpdatedTime = DateTimeOffset.UtcNow;
+
+            using var stream = new MemoryStream();
+            using (var writer = XmlWriter.Create(stream, new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true
+            }))
+            {
+                new Rss20FeedFormatter(feed).WriteTo(writer);
+            }
+
+            return Results.Content(
+                Encoding.UTF8.GetString(stream.ToArray()),
+                "application/rss+xml",
+                Encoding.UTF8);
         }
-
-        return Results.Content(
-            Encoding.UTF8.GetString(stream.ToArray()),
-            "application/rss+xml",
-            Encoding.UTF8);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate RSS feed");
+            return Results.Problem("Failed to generate RSS feed", statusCode: 500);
+        }
     }
 }
